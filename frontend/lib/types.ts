@@ -1,14 +1,3 @@
-export type ExpenseCategory =
-  | "food"
-  | "transport"
-  | "entertainment"
-  | "shopping"
-  | "utilities"
-  | "rent"
-  | "travel"
-  | "healthcare"
-  | "other";
-
 export interface User {
   _id: string;
   name: string;
