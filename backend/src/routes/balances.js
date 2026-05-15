@@ -2,7 +2,6 @@ const express = require("express");
 const auth = require("../middleware/auth");
 const User = require("../models/User");
 const Expense = require("../models/Expense");
-const Settlement = require("../models/Settlement");
 const { computeBalances } = require("../utils/balance");
 
 const router = express.Router();
@@ -20,14 +19,9 @@ router.get("/friends", async (req, res, next) => {
       $or: [{ participants: req.user._id }, { paidBy: req.user._id }],
     }).select("amount splitType splits participants paidBy");
 
-    const settlements = await Settlement.find({
-      $or: [{ from: req.user._id }, { to: req.user._id }],
-    }).select("from to amount");
-
     const balanceMap = computeBalances({
       userId: req.user._id.toString(),
       expenses,
-      settlements,
     });
 
     const payload = friends.map((friend) => ({
@@ -70,14 +64,9 @@ router.post("/settle", async (req, res, next) => {
       $or: [{ participants: req.user._id }, { paidBy: req.user._id }],
     }).select("amount splitType splits participants paidBy");
 
-    const settlements = await Settlement.find({
-      $or: [{ from: req.user._id }, { to: req.user._id }],
-    }).select("from to amount");
-
     const balanceMap = computeBalances({
       userId: req.user._id.toString(),
       expenses,
-      settlements,
     });
 
     const currentBalance = balanceMap.get(friendId.toString()) || 0;
@@ -85,13 +74,20 @@ router.post("/settle", async (req, res, next) => {
       return res.status(400).json({ message: "Already settled" });
     }
 
-    const from = currentBalance < 0 ? req.user._id : friend._id;
-    const to = currentBalance < 0 ? friend._id : req.user._id;
+    const debtorId = currentBalance < 0 ? req.user._id : friend._id;
+    const creditorId = currentBalance < 0 ? friend._id : req.user._id;
 
-    await Settlement.create({
-      from,
-      to,
+    await Expense.create({
+      title: "Settlement",
+      description: "",
       amount: amountValue,
+      paidBy: debtorId,
+      participants: [debtorId, creditorId],
+      splitType: "unequal",
+      splits: [
+        { user: debtorId, amountOwed: 0 },
+        { user: creditorId, amountOwed: amountValue },
+      ],
       createdBy: req.user._id,
     });
 

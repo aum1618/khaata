@@ -5,7 +5,6 @@ const auth = require("../middleware/auth");
 const User = require("../models/User");
 const FriendRequest = require("../models/FriendRequest");
 const Expense = require("../models/Expense");
-const Settlement = require("../models/Settlement");
 
 const router = express.Router();
 
@@ -157,9 +156,6 @@ router.delete("/account", auth, async (req, res, next) => {
         { paidBy: userId },
       ],
     });
-    await Settlement.deleteMany({
-      $or: [{ from: userId }, { to: userId }],
-    });
     await User.findByIdAndDelete(userId);
 
     return res.json({ ok: true });
@@ -172,7 +168,7 @@ router.get("/export", auth, async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const [user, expenses, settlements] = await Promise.all([
+    const [user, expenses] = await Promise.all([
       User.findById(userId).select("_id name email friends").lean(),
       Expense.find({
         $or: [
@@ -185,19 +181,12 @@ router.get("/export", auth, async (req, res, next) => {
         .populate("participants", "_id name email")
         .populate("splits.user", "_id name email")
         .lean(),
-      Settlement.find({
-        $or: [{ from: userId }, { to: userId }],
-      })
-        .populate("from", "_id name email")
-        .populate("to", "_id name email")
-        .lean(),
     ]);
 
     return res.json({
       exportedAt: new Date().toISOString(),
       user,
       expenses,
-      settlements,
     });
   } catch (error) {
     return next(error);

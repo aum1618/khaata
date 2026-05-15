@@ -61,7 +61,7 @@ const buildShareMap = (expense) => {
   return shares;
 };
 
-const computeBalances = ({ userId, expenses, settlements }) => {
+const computeBalances = ({ userId, expenses }) => {
   const balanceMap = new Map();
 
   const addBalance = (friendId, amount) => {
@@ -86,17 +86,6 @@ const computeBalances = ({ userId, expenses, settlements }) => {
     if (shareMap.has(userId)) {
       const share = shareMap.get(userId) || 0;
       addBalance(paidById, -share);
-    }
-  });
-
-  (settlements || []).forEach((settlement) => {
-    const fromId = getId(settlement.from);
-    const toId = getId(settlement.to);
-    const amount = Number(settlement.amount || 0);
-    if (fromId === userId) {
-      addBalance(toId, amount);
-    } else if (toId === userId) {
-      addBalance(fromId, -amount);
     }
   });
 

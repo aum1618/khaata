@@ -39,8 +39,6 @@ export default function FriendDetailPage({
   const { user } = useAuth();
   const { symbol } = useCurrency();
   const [showSettleModal, setShowSettleModal] = useState(false);
-  const [settleAmount, setSettleAmount] = useState("");
-  const [settleError, setSettleError] = useState("");
   const [friendEntry, setFriendEntry] = useState<FriendBalance | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,22 +84,12 @@ export default function FriendDetailPage({
   const balanceAmount = friendEntry?.balance ?? 0;
 
   const handleSettle = async () => {
-    const amount = Number(settleAmount);
-    const maxAmount = Math.abs(balanceAmount);
-    if (!amount || amount <= 0) {
-      setSettleError(strings.friendDetails.modal.errors.invalidAmount);
-      return;
-    }
-    if (amount > maxAmount) {
-      setSettleError(strings.friendDetails.modal.errors.exceedsBalance);
-      return;
-    }
+    const amount = Math.abs(balanceAmount);
+    if (!amount) return;
     if (!friend) return;
     try {
       await apiPost("/balances/settle", { friendId: friend._id, amount });
       setShowSettleModal(false);
-      setSettleAmount("");
-      setSettleError("");
       const updated = await apiGet("/balances/friends");
       const entry = (updated || []).find(
         (b: FriendBalance) => b.friend._id === friend._id,
@@ -345,7 +333,6 @@ export default function FriendDetailPage({
             open={showSettleModal}
             onClose={() => {
               setShowSettleModal(false);
-              setSettleError("");
             }}
             title={strings.friendDetails.modal.title}
           >
@@ -364,40 +351,13 @@ export default function FriendDetailPage({
                   })}
                 </p>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {strings.friendDetails.modal.amountLabel}
-                </label>
-                <NeoInput
-                  type="number"
-                  value={settleAmount}
-                  onChange={(e) => setSettleAmount(e.target.value)}
-                  placeholder={strings.friendDetails.modal.amountPlaceholder}
-                  min="0"
-                  aria-invalid={!!settleError}
-                />
-              </div>
-              {settleError && (
-                <p className="text-sm text-red-600">{settleError}</p>
-              )}
-
-              <div className="flex gap-3 pt-4 border-t-2 border-black">
-                <NeoButton
-                  variant="ghost"
-                  className="flex-1"
-                  onClick={() => setShowSettleModal(false)}
-                >
-                  {strings.friendDetails.modal.cancel}
-                </NeoButton>
-                <NeoButton
-                  variant="accent"
-                  className="flex-1"
-                  onClick={handleSettle}
-                >
-                  {strings.friendDetails.modal.confirm}
-                </NeoButton>
-              </div>
+              <NeoButton
+                variant="accent"
+                className="w-full"
+                onClick={handleSettle}
+              >
+                {strings.friendDetails.settleUp}
+              </NeoButton>
             </div>
           </NeoModal>
         </>
