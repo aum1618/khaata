@@ -3,6 +3,7 @@
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { strings } from "@/locales/en";
 
 function AntiAuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -17,7 +18,7 @@ function AntiAuthGuard({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading the vibe...
+        {strings.common.loadingVibe}
       </div>
     );
   }
@@ -33,9 +34,7 @@ export default function AuthLayout({
 }) {
   return (
     <AuthProvider>
-      <AntiAuthGuard>
-        {children}
-      </AntiAuthGuard>
+      <AntiAuthGuard>{children}</AntiAuthGuard>
     </AuthProvider>
   );
 }

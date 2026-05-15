@@ -25,6 +25,7 @@ import { apiDelete, apiGet, apiPut } from "@/lib/api";
 import { currencyOptions, formatCurrency, useCurrency } from "@/lib/currency";
 import { toast } from "@/hooks/use-toast";
 import { isStrongPassword } from "@/lib/validation";
+import { strings } from "@/locales/en";
 
 interface SettingsSectionProps {
   title: string;
@@ -71,7 +72,7 @@ function SettingsItem({
       <div
         className={cn(
           "w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center shrink-0",
-          danger ? "bg-[#FF6B6B]" : "bg-[#A6FAFF]",
+          danger ? "bg-destructive" : "bg-primary",
         )}
       >
         {icon}
@@ -137,8 +138,11 @@ export default function SettingsPage() {
         );
       } catch (error) {
         toast({
-          title: "Could not load stats",
-          description: getErrorMessage(error, "Try again."),
+          title: strings.settings.toasts.loadStatsFail,
+          description: getErrorMessage(
+            error,
+            strings.settings.toasts.loadFailFallback,
+          ),
           variant: "destructive",
         });
       }
@@ -150,8 +154,8 @@ export default function SettingsPage() {
   const handleLogout = () => {
     logout();
     toast({
-      title: "Signed out",
-      description: "You are logged out.",
+      title: strings.settings.toasts.signedOutTitle,
+      description: strings.settings.toasts.signedOutDescription,
     });
     router.push("/login");
   };
@@ -159,7 +163,7 @@ export default function SettingsPage() {
   const handleSaveProfile = async () => {
     const trimmed = name.trim();
     if (!trimmed) {
-      setProfileError("Name is missing");
+      setProfileError(strings.settings.errors.nameMissing);
       return;
     }
 
@@ -170,14 +174,17 @@ export default function SettingsPage() {
       await refreshProfile();
       setShowEditProfile(false);
       toast({
-        title: "Profile updated",
-        description: "Name saved.",
+        title: strings.settings.toasts.profileUpdatedTitle,
+        description: strings.settings.toasts.profileUpdatedDescription,
       });
     } catch (error) {
-      const message = getErrorMessage(error, "Could not update profile");
+      const message = getErrorMessage(
+        error,
+        strings.settings.toasts.updateProfileFailFallback,
+      );
       setProfileError(message);
       toast({
-        title: "Update failed",
+        title: strings.settings.toasts.updateFailedTitle,
         description: message,
         variant: "destructive",
       });
@@ -188,15 +195,15 @@ export default function SettingsPage() {
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
-      setPasswordError("Fill every password field");
+      setPasswordError(strings.settings.errors.passwordFieldsMissing);
       return;
     }
     if (!isStrongPassword(newPassword)) {
-      setPasswordError("Use 8+ chars with letters and numbers");
+      setPasswordError(strings.settings.errors.passwordWeak);
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match");
+      setPasswordError(strings.settings.errors.passwordMismatch);
       return;
     }
 
@@ -209,14 +216,17 @@ export default function SettingsPage() {
       setConfirmPassword("");
       setShowChangePassword(false);
       toast({
-        title: "Password updated",
-        description: "Password changed.",
+        title: strings.settings.toasts.passwordUpdatedTitle,
+        description: strings.settings.toasts.passwordUpdatedDescription,
       });
     } catch (error) {
-      const message = getErrorMessage(error, "Could not update password");
+      const message = getErrorMessage(
+        error,
+        strings.settings.toasts.updatePasswordFailFallback,
+      );
       setPasswordError(message);
       toast({
-        title: "Update failed",
+        title: strings.settings.toasts.updateFailedTitle,
         description: message,
         variant: "destructive",
       });
@@ -241,13 +251,16 @@ export default function SettingsPage() {
       link.remove();
       URL.revokeObjectURL(url);
       toast({
-        title: "Export ready",
-        description: "Download started.",
+        title: strings.settings.toasts.exportReadyTitle,
+        description: strings.settings.toasts.exportReadyDescription,
       });
     } catch (error) {
       toast({
-        title: "Export failed",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.settings.toasts.exportFailedTitle,
+        description: getErrorMessage(
+          error,
+          strings.settings.toasts.loadFailFallback,
+        ),
         variant: "destructive",
       });
     } finally {
@@ -262,14 +275,17 @@ export default function SettingsPage() {
       await apiDelete("/auth/account");
       logout();
       toast({
-        title: "Account deleted",
-        description: "Account removed.",
+        title: strings.settings.toasts.accountDeletedTitle,
+        description: strings.settings.toasts.accountDeletedDescription,
       });
       router.push("/login");
     } catch (error) {
       toast({
-        title: "Delete failed",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.settings.toasts.deleteFailedTitle,
+        description: getErrorMessage(
+          error,
+          strings.settings.toasts.loadFailFallback,
+        ),
         variant: "destructive",
       });
     } finally {
@@ -285,13 +301,15 @@ export default function SettingsPage() {
     <div className="p-4 md:p-6 space-y-6 max-w-2xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
-        <p className="text-gray-600">Tweak your account and vibes</p>
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {strings.settings.title}
+        </h1>
+        <p className="text-gray-600">{strings.settings.subtitle}</p>
       </div>
 
       {/* Profile Section */}
       <NeoCard shadow="lg">
-        <div className="p-6 bg-[#A6FAFF] border-b-2 border-black">
+        <div className="p-6 bg-primary border-b-2 border-black">
           <div className="flex items-center gap-4">
             <div className="relative">
               <NeoAvatar name={user?.name || "User"} size="lg" />
@@ -305,11 +323,15 @@ export default function SettingsPage() {
         <div className="p-4 grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-2xl font-bold">{friendsCount}</p>
-            <p className="text-xs text-gray-500">Squad</p>
+            <p className="text-xs text-gray-500">
+              {strings.settings.profile.labelSquad}
+            </p>
           </div>
           <div>
             <p className="text-2xl font-bold">{expensesCount}</p>
-            <p className="text-xs text-gray-500">Splits</p>
+            <p className="text-xs text-gray-500">
+              {strings.settings.profile.labelSplits}
+            </p>
           </div>
           <div>
             <p className="text-2xl font-bold">
@@ -318,33 +340,35 @@ export default function SettingsPage() {
                 maximumFractionDigits: 0,
               })}
             </p>
-            <p className="text-xs text-gray-500">Total Split</p>
+            <p className="text-xs text-gray-500">
+              {strings.settings.profile.labelTotal}
+            </p>
           </div>
         </div>
       </NeoCard>
 
       {/* Account Settings */}
-      <SettingsSection title="Account">
+      <SettingsSection title={strings.settings.sections.account}>
         <SettingsItem
           icon={<User className="w-5 h-5" />}
-          label="Edit profile"
-          description="Update your name and pic"
+          label={strings.settings.items.editProfile.label}
+          description={strings.settings.items.editProfile.description}
           onClick={() => setShowEditProfile(true)}
         />
 
         <SettingsItem
           icon={<Lock className="w-5 h-5" />}
-          label="Change password"
-          description="Update your password"
+          label={strings.settings.items.changePassword.label}
+          description={strings.settings.items.changePassword.description}
           onClick={() => setShowChangePassword(true)}
         />
       </SettingsSection>
 
       {/* Preferences */}
-      <SettingsSection title="Preferences">
+      <SettingsSection title={strings.settings.sections.preferences}>
         <SettingsItem
           icon={<Globe className="w-5 h-5" />}
-          label="Currency"
+          label={strings.settings.items.currency.label}
           description={selectedCurrency.label}
           action={
             <NeoSelect
@@ -358,26 +382,26 @@ export default function SettingsPage() {
       </SettingsSection>
 
       {/* Data & Privacy */}
-      <SettingsSection title="Data and privacy">
+      <SettingsSection title={strings.settings.sections.dataPrivacy}>
         <SettingsItem
           icon={<Download className="w-5 h-5" />}
-          label="Export data"
-          description="Download your data"
+          label={strings.settings.items.export.label}
+          description={strings.settings.items.export.description}
           onClick={exporting ? undefined : handleExportData}
         />
       </SettingsSection>
 
       {/* Danger Zone */}
-      <SettingsSection title="Danger zone">
+      <SettingsSection title={strings.settings.sections.danger}>
         <SettingsItem
           icon={<LogOut className="w-5 h-5" />}
-          label="Log out"
+          label={strings.settings.items.logout.label}
           onClick={handleLogout}
         />
         <SettingsItem
           icon={<Trash2 className="w-5 h-5" />}
-          label="Delete account"
-          description="Permanently delete your account and data"
+          label={strings.settings.items.delete.label}
+          description={strings.settings.items.delete.description}
           onClick={() => setShowDeleteAccount(true)}
           danger
         />
@@ -387,7 +411,7 @@ export default function SettingsPage() {
       <NeoModal
         open={showEditProfile}
         onClose={() => setShowEditProfile(false)}
-        title="Edit profile"
+        title={strings.settings.modals.editProfile.title}
       >
         <div className="space-y-4">
           <div className="flex justify-center">
@@ -397,21 +421,25 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Your name</label>
+            <label className="text-sm font-medium">
+              {strings.settings.modals.editProfile.nameLabel}
+            </label>
             <NeoInput
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
+              placeholder={strings.settings.modals.editProfile.namePlaceholder}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium">
+              {strings.settings.modals.editProfile.emailLabel}
+            </label>
             <NeoInput
               type="email"
               value={email}
               disabled
-              placeholder="your@email.com"
+              placeholder={strings.settings.modals.editProfile.emailPlaceholder}
             />
           </div>
 
@@ -425,7 +453,7 @@ export default function SettingsPage() {
               className="flex-1"
               onClick={() => setShowEditProfile(false)}
             >
-              Cancel
+              {strings.settings.modals.editProfile.cancel}
             </NeoButton>
             <NeoButton
               variant="accent"
@@ -433,7 +461,9 @@ export default function SettingsPage() {
               onClick={handleSaveProfile}
               disabled={profileSaving}
             >
-              {profileSaving ? "Saving..." : "Save changes"}
+              {profileSaving
+                ? strings.settings.modals.editProfile.saving
+                : strings.settings.modals.editProfile.save}
             </NeoButton>
           </div>
         </div>
@@ -443,41 +473,53 @@ export default function SettingsPage() {
       <NeoModal
         open={showChangePassword}
         onClose={() => setShowChangePassword(false)}
-        title="Change password"
+        title={strings.settings.modals.changePassword.title}
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Current password</label>
+            <label className="text-sm font-medium">
+              {strings.settings.modals.changePassword.currentLabel}
+            </label>
             <NeoInput
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Enter current password"
+              placeholder={
+                strings.settings.modals.changePassword.currentPlaceholder
+              }
               aria-invalid={!!passwordError}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">New password</label>
+            <label className="text-sm font-medium">
+              {strings.settings.modals.changePassword.newLabel}
+            </label>
             <NeoInput
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password"
+              placeholder={
+                strings.settings.modals.changePassword.newPlaceholder
+              }
               minLength={8}
               pattern="(?=.*[A-Za-z])(?=.*\d).{8,}"
-              title="Use at least 8 characters with letters and numbers"
+              title={strings.common.passwordHint}
               aria-invalid={!!passwordError}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Confirm new password</label>
+            <label className="text-sm font-medium">
+              {strings.settings.modals.changePassword.confirmLabel}
+            </label>
             <NeoInput
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
+              placeholder={
+                strings.settings.modals.changePassword.confirmPlaceholder
+              }
               minLength={8}
               aria-invalid={!!passwordError}
             />
@@ -493,7 +535,7 @@ export default function SettingsPage() {
               className="flex-1"
               onClick={() => setShowChangePassword(false)}
             >
-              Cancel
+              {strings.settings.modals.changePassword.cancel}
             </NeoButton>
             <NeoButton
               variant="primary"
@@ -501,7 +543,9 @@ export default function SettingsPage() {
               onClick={handleChangePassword}
               disabled={passwordSaving}
             >
-              {passwordSaving ? "Updating..." : "Update password"}
+              {passwordSaving
+                ? strings.settings.modals.changePassword.updating
+                : strings.settings.modals.changePassword.update}
             </NeoButton>
           </div>
         </div>
@@ -511,22 +555,25 @@ export default function SettingsPage() {
       <NeoModal
         open={showDeleteAccount}
         onClose={() => setShowDeleteAccount(false)}
-        title="Delete account"
+        title={strings.settings.modals.deleteAccount.title}
       >
         <div className="space-y-4">
-          <div className="p-4 bg-[#FF6B6B] border-2 border-black rounded-md">
+          <div className="p-4 bg-destructive border-2 border-black rounded-md">
             <p className="font-bold text-center">
-              No undo button
+              {strings.settings.modals.deleteAccount.warningTitle}
             </p>
           </div>
           <p className="text-sm text-gray-600">
-            Deleting your account wipes your data, including expenses and
-            friend connections. This is permanent.
+            {strings.settings.modals.deleteAccount.warningCopy}
           </p>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Type DELETE to confirm</label>
+            <label className="text-sm font-medium">
+              {strings.settings.modals.deleteAccount.confirmLabel}
+            </label>
             <NeoInput
-              placeholder="DELETE"
+              placeholder={
+                strings.settings.modals.deleteAccount.confirmPlaceholder
+              }
               value={confirmDeleteText}
               onChange={(e) => setConfirmDeleteText(e.target.value)}
             />
@@ -537,18 +584,22 @@ export default function SettingsPage() {
               className="flex-1"
               onClick={() => setShowDeleteAccount(false)}
             >
-              Cancel
+              {strings.settings.modals.deleteAccount.cancel}
             </NeoButton>
             <NeoButton
               variant="destructive"
               className="flex-1"
               onClick={handleDeleteAccount}
               disabled={
-                deleting || confirmDeleteText.trim().toUpperCase() !== "DELETE"
+                deleting ||
+                confirmDeleteText.trim().toUpperCase() !==
+                  strings.settings.modals.deleteAccount.confirmText
               }
             >
               <Trash2 className="w-4 h-4" />
-              {deleting ? "Deleting..." : "Delete account"}
+              {deleting
+                ? strings.settings.modals.deleteAccount.deleting
+                : strings.settings.modals.deleteAccount.action}
             </NeoButton>
           </div>
         </div>

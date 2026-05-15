@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { AppShell } from "@/components/app-shell";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { strings } from "@/locales/en";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -18,7 +19,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   if (isLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        {strings.common.loading}
       </div>
     );
   }

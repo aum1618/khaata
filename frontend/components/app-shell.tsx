@@ -6,18 +6,19 @@ import { Home, Users, Settings, Wallet, Plus, Shield } from "lucide-react";
 import { NeoButton } from "@/components/neo-ui";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { strings } from "@/locales/en";
 
 const baseNavItems = [
-  { id: "home", label: "Hub", href: "/dashboard", icon: Home },
+  { id: "home", label: strings.shell.nav.home, href: "/dashboard", icon: Home },
   {
     id: "friends",
-    label: "Squad",
+    label: strings.shell.nav.friends,
     href: "/dashboard/friends",
     icon: Users,
   },
   {
     id: "settings",
-    label: "Me",
+    label: strings.shell.nav.settings,
     href: "/dashboard/settings",
     icon: Settings,
   },
@@ -28,17 +29,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user } = useAuth();
 
-  const navItems = user?.role === "admin"
-    ? [
-        ...baseNavItems,
-        {
-          id: "admin",
-          label: "Admin Lab",
-          href: "/dashboard/admin",
-          icon: Shield,
-        },
-      ]
-    : baseNavItems;
+  const navItems =
+    user?.role === "admin"
+      ? [
+          ...baseNavItems,
+          {
+            id: "admin",
+            label: strings.shell.nav.admin,
+            href: "/dashboard/admin",
+            icon: Shield,
+          },
+        ]
+      : baseNavItems;
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -50,16 +52,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const showAddExpenseButton = !pathname.includes("/settings");
 
   return (
-    <div className="min-h-screen bg-[#FFFEF0]">
+    <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-screen md:w-64 md:border-r-2 md:border-black bg-white">
         {/* Logo */}
         <div className="p-4 border-b-2 border-black">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#A6FAFF] border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <div className="w-10 h-10 bg-primary border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)]">
               <Wallet className="w-6 h-6" />
             </div>
-            <span className="text-2xl font-bold">Khaata</span>
+            <span className="text-2xl font-bold">{strings.app.name}</span>
           </Link>
         </div>
 
@@ -75,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-md border-2 border-black font-medium transition-all",
                   active
-                    ? "bg-[#A6FAFF] shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    ? "bg-primary shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                     : "bg-white hover:bg-gray-100 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
                 )}
               >
@@ -95,7 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               onClick={() => router.push("/dashboard/add-expense")}
             >
               <Plus className="w-5 h-5" />
-              Add a bill
+              {strings.shell.addBill}
             </NeoButton>
           </div>
         )}
@@ -124,7 +126,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <div
                   className={cn(
                     "p-1.5 rounded-md border-2",
-                    active ? "bg-[#A6FAFF] border-black" : "border-transparent",
+                    active ? "bg-primary border-black" : "border-transparent",
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -142,7 +144,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {showAddExpenseButton && (
         <button
           onClick={() => router.push("/dashboard/add-expense")}
-          className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-[#FFA6F6] border-2 border-black rounded-full flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all z-50"
+          aria-label={strings.shell.addBill}
+          title={strings.shell.addBill}
+          className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-secondary border-2 border-black rounded-full flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 transition-all z-50"
         >
           <Plus className="w-7 h-7" />
         </button>

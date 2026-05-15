@@ -27,6 +27,7 @@ import { FriendBalance } from "@/lib/types";
 import { formatCurrency, useCurrency } from "@/lib/currency";
 import { toast } from "@/hooks/use-toast";
 import { isValidEmail } from "@/lib/validation";
+import { strings } from "@/locales/en";
 
 export default function FriendsPage() {
   const initialTab = "friends";
@@ -57,8 +58,11 @@ export default function FriendsPage() {
       setFriends(data);
     } catch (error) {
       toast({
-        title: "Could not load the squad",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.friends.toasts.loadFriendsFail,
+        description: getErrorMessage(
+          error,
+          strings.friends.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -70,8 +74,11 @@ export default function FriendsPage() {
       setRequests(data);
     } catch (error) {
       toast({
-        title: "Could not load requests",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.friends.toasts.loadRequestsFail,
+        description: getErrorMessage(
+          error,
+          strings.friends.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -80,11 +87,11 @@ export default function FriendsPage() {
   const handleSearchUser = async () => {
     const email = searchEmail.trim();
     if (!email) {
-      setSearchError("Email is missing");
+      setSearchError(strings.friends.addModal.errors.emailMissing);
       return;
     }
     if (!isValidEmail(email)) {
-      setSearchError("That email looks off");
+      setSearchError(strings.friends.addModal.errors.emailInvalid);
       return;
     }
     setSearching(true);
@@ -95,13 +102,16 @@ export default function FriendsPage() {
         `/friends/search?email=${encodeURIComponent(email)}`,
       );
       if (data?.isFriend) {
-        setSearchError("You are already connected");
+        setSearchError(strings.friends.addModal.errors.alreadyConnected);
       } else if (data?.hasPendingRequest) {
-        setSearchError("A request is already pending");
+        setSearchError(strings.friends.addModal.errors.pending);
       }
       setFoundUser(data?.user || data);
     } catch (error) {
-      const message = getErrorMessage(error, "No user found for that email");
+      const message = getErrorMessage(
+        error,
+        strings.friends.addModal.errors.notFoundFallback,
+      );
       setSearchError(message);
     } finally {
       setSearching(false);
@@ -115,13 +125,18 @@ export default function FriendsPage() {
       setRequestSent(true);
       fetchRequests();
       toast({
-        title: "Request sent",
-        description: `Request to ${foundUser.name || "that user"} is on the way.`,
+        title: strings.friends.toasts.requestSentTitle,
+        description: strings.friends.toasts.requestSentDescription(
+          foundUser.name || "that user",
+        ),
       });
     } catch (error) {
       toast({
-        title: "Request failed",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.friends.toasts.requestFailTitle,
+        description: getErrorMessage(
+          error,
+          strings.friends.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -133,13 +148,16 @@ export default function FriendsPage() {
       fetchRequests();
       fetchFriends();
       toast({
-        title: "Friend added",
-        description: "You two are linked.",
+        title: strings.friends.toasts.acceptTitle,
+        description: strings.friends.toasts.acceptDescription,
       });
     } catch (error) {
       toast({
-        title: "Could not accept",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.friends.toasts.acceptFailTitle,
+        description: getErrorMessage(
+          error,
+          strings.friends.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -150,13 +168,16 @@ export default function FriendsPage() {
       await apiPut(`/friends/request/${requestId}/reject`, {});
       fetchRequests();
       toast({
-        title: "Request declined",
-        description: "Request removed.",
+        title: strings.friends.toasts.rejectTitle,
+        description: strings.friends.toasts.rejectDescription,
       });
     } catch (error) {
       toast({
-        title: "Could not reject",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.friends.toasts.rejectFailTitle,
+        description: getErrorMessage(
+          error,
+          strings.friends.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -169,7 +190,11 @@ export default function FriendsPage() {
   );
 
   const tabs = [
-    { id: "friends", label: "Squad", icon: <UserPlus className="w-4 h-4" /> },
+    {
+      id: "friends",
+      label: strings.friends.title,
+      icon: <UserPlus className="w-4 h-4" />,
+    },
   ];
 
   return (
@@ -177,8 +202,10 @@ export default function FriendsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Squad</h1>
-          <p className="text-gray-600">Manage your people</p>
+          <h1 className="text-2xl md:text-3xl font-bold">
+            {strings.friends.title}
+          </h1>
+          <p className="text-gray-600">{strings.friends.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <NeoButton
@@ -187,7 +214,7 @@ export default function FriendsPage() {
             className="relative"
           >
             <Bell className="w-4 h-4" />
-            Requests
+            {strings.friends.requestsButton}
             {requests.length > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                 {requests.length}
@@ -199,7 +226,7 @@ export default function FriendsPage() {
             onClick={() => setShowAddFriendModal(true)}
           >
             <UserPlus className="w-4 h-4" />
-            Add a friend
+            {strings.friends.addFriendButton}
           </NeoButton>
         </div>
       </div>
@@ -208,7 +235,7 @@ export default function FriendsPage() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
         <NeoInput
-          placeholder="Search the squad..."
+          placeholder={strings.friends.searchPlaceholder}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
@@ -227,19 +254,21 @@ export default function FriendsPage() {
           <div className="grid grid-cols-3 gap-4">
             <NeoCard className="p-4 text-center" shadow="sm">
               <p className="text-2xl font-bold">{friends.length}</p>
-              <p className="text-sm text-gray-600">Total squad</p>
+              <p className="text-sm text-gray-600">
+                {strings.friends.summaryTotal}
+              </p>
             </NeoCard>
-            <NeoCard className="p-4 text-center bg-[#B8FF9F]" shadow="sm">
+            <NeoCard className="p-4 text-center bg-accent" shadow="sm">
               <p className="text-2xl font-bold">
                 {friends.filter((f) => f.balance > 0).length}
               </p>
-              <p className="text-sm">Owe you</p>
+              <p className="text-sm">{strings.friends.summaryOweYou}</p>
             </NeoCard>
-            <NeoCard className="p-4 text-center bg-[#FFA6F6]" shadow="sm">
+            <NeoCard className="p-4 text-center bg-secondary" shadow="sm">
               <p className="text-2xl font-bold">
                 {friends.filter((f) => f.balance < 0).length}
               </p>
-              <p className="text-sm">You owe</p>
+              <p className="text-sm">{strings.friends.summaryYouOwe}</p>
             </NeoCard>
           </div>
 
@@ -286,7 +315,9 @@ export default function FriendsPage() {
                           )}
                         {(friendShip.balance === 0 ||
                           friendShip.balance === undefined) && (
-                          <NeoBadge variant="default">Settled</NeoBadge>
+                          <NeoBadge variant="default">
+                            {strings.friends.settled}
+                          </NeoBadge>
                         )}
                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
@@ -295,7 +326,7 @@ export default function FriendsPage() {
                 })
               ) : (
                 <div className="p-8 text-center text-gray-500">
-                  No matches in your squad
+                  {strings.friends.noMatches}
                 </div>
               )}
             </div>
@@ -313,15 +344,17 @@ export default function FriendsPage() {
           setSearchError("");
           setRequestSent(false);
         }}
-        title="Add a friend"
+        title={strings.friends.addModal.title}
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Friend email</label>
+            <label className="text-sm font-medium">
+              {strings.friends.addModal.emailLabel}
+            </label>
             <div className="flex gap-2">
               <NeoInput
                 type="email"
-                placeholder="name@example.com"
+                placeholder={strings.friends.addModal.emailPlaceholder}
                 value={searchEmail}
                 onChange={(e) => setSearchEmail(e.target.value)}
               />
@@ -330,7 +363,9 @@ export default function FriendsPage() {
                 onClick={handleSearchUser}
                 disabled={searching}
               >
-                {searching ? "Searching..." : "Find"}
+                {searching
+                  ? strings.friends.addModal.searchLoading
+                  : strings.friends.addModal.searchAction}
               </NeoButton>
             </div>
           </div>
@@ -345,7 +380,7 @@ export default function FriendsPage() {
                 <NeoAvatar name={foundUser.name || "User"} size="sm" />
                 <div className="flex-1">
                   <p className="font-bold text-sm">
-                    {foundUser.name || "Unknown User"}
+                    {foundUser.name || strings.friends.addModal.userFallback}
                   </p>
                   <p className="text-xs text-gray-500">
                     {foundUser.email || ""}
@@ -361,7 +396,9 @@ export default function FriendsPage() {
               onClick={handleSendRequest}
               disabled={requestSent || !foundUser || !!searchError}
             >
-                {requestSent ? "Sent" : "Send request"}
+              {requestSent
+                ? strings.friends.addModal.sent
+                : strings.friends.addModal.sendRequest}
             </NeoButton>
           </div>
 
@@ -377,7 +414,7 @@ export default function FriendsPage() {
                 setRequestSent(false);
               }}
             >
-              Close
+              {strings.friends.addModal.close}
             </NeoButton>
           </div>
         </div>
@@ -387,7 +424,7 @@ export default function FriendsPage() {
       <NeoModal
         open={showRequestsModal}
         onClose={() => setShowRequestsModal(false)}
-        title="Friend requests"
+        title={strings.friends.requestsModal.title}
       >
         <div className="space-y-4">
           {requests.length > 0 ? (
@@ -429,7 +466,7 @@ export default function FriendsPage() {
             </div>
           ) : (
             <div className="p-6 text-center text-gray-500">
-              No pending requests
+              {strings.friends.requestsModal.empty}
             </div>
           )}
           <div className="flex gap-3 pt-4 border-t-2 border-black">
@@ -438,7 +475,7 @@ export default function FriendsPage() {
               className="flex-1"
               onClick={() => setShowRequestsModal(false)}
             >
-              Close
+              {strings.common.close}
             </NeoButton>
           </div>
         </div>

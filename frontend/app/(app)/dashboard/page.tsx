@@ -14,6 +14,8 @@ import { apiGet } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { Expense, FriendBalance } from "@/lib/types";
 import { formatCurrency, useCurrency } from "@/lib/currency";
+import { strings } from "@/locales/en";
+import { themeVars } from "@/lib/theme";
 import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/utils";
@@ -36,8 +38,11 @@ export default function DashboardPage() {
         setExpenses(expenseData || []);
       } catch (error) {
         toast({
-          title: "Could not load dashboard",
-          description: getErrorMessage(error, "Try again."),
+          title: strings.dashboard.toasts.loadFailTitle,
+          description: getErrorMessage(
+            error,
+            strings.dashboard.toasts.loadFailFallback,
+          ),
           variant: "destructive",
         });
       } finally {
@@ -78,23 +83,36 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">
-            Yo, {user?.name?.split(" ")[0] || "there"}
+            {strings.dashboard.greeting(
+              user?.name?.split(" ")[0] || strings.dashboard.greetingFallback,
+            )}
           </h1>
-          <p className="text-gray-600">{"Here is the money vibe"}</p>
+          <p className="text-gray-600">{strings.dashboard.subtitle}</p>
         </div>
-        <NeoAvatar name={user?.name || "User"} size="lg" />
+        <NeoAvatar
+          name={user?.name || strings.dashboard.userFallback}
+          size="lg"
+        />
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Net Balance */}
         <NeoCard
-          className={`p-5 ${totals.netBalance >= 0 ? "bg-[#B8FF9F]" : "bg-[#FF6B6B]"}`}
+          className="p-5"
+          style={{
+            backgroundColor:
+              totals.netBalance >= 0
+                ? themeVars.neoGreen
+                : themeVars.destructive,
+          }}
           shadow="md"
         >
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium mb-1">Net vibe</p>
+              <p className="text-sm font-medium mb-1">
+                {strings.dashboard.summary.netTitle}
+              </p>
               <p className="text-3xl font-bold">
                 {formatCurrency(totals.netBalance, symbol, {
                   absolute: true,
@@ -102,8 +120,8 @@ export default function DashboardPage() {
               </p>
               <p className="text-sm mt-1">
                 {totals.netBalance >= 0
-                  ? "Overall, they owe you"
-                  : "Overall, you owe"}
+                  ? strings.dashboard.summary.netPositive
+                  : strings.dashboard.summary.netNegative}
               </p>
             </div>
             <div className="w-12 h-12 bg-white border-2 border-black rounded-lg flex items-center justify-center">
@@ -113,16 +131,24 @@ export default function DashboardPage() {
         </NeoCard>
 
         {/* You Are Owed */}
-        <NeoCard className="p-5 bg-[#A6FAFF]" shadow="md">
+        <NeoCard
+          className="p-5"
+          style={{ backgroundColor: themeVars.neoCyan }}
+          shadow="md"
+        >
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium mb-1">You are owed</p>
+              <p className="text-sm font-medium mb-1">
+                {strings.dashboard.summary.owedTitle}
+              </p>
               <p className="text-3xl font-bold text-green-700">
                 {formatCurrency(totals.youAreOwed, symbol)}
               </p>
               <p className="text-sm mt-1 flex items-center gap-1">
                 <ArrowUpRight className="w-4 h-4 text-green-600" />
-                From {balances.filter((b) => b.balance > 0).length} friends
+                {strings.dashboard.summary.owedBy(
+                  balances.filter((b) => b.balance > 0).length,
+                )}
               </p>
             </div>
             <div className="w-12 h-12 bg-white border-2 border-black rounded-lg flex items-center justify-center">
@@ -132,16 +158,24 @@ export default function DashboardPage() {
         </NeoCard>
 
         {/* You Owe */}
-        <NeoCard className="p-5 bg-[#FFA6F6]" shadow="md">
+        <NeoCard
+          className="p-5"
+          style={{ backgroundColor: themeVars.neoPink }}
+          shadow="md"
+        >
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium mb-1">You owe</p>
+              <p className="text-sm font-medium mb-1">
+                {strings.dashboard.summary.oweTitle}
+              </p>
               <p className="text-3xl font-bold text-red-600">
                 {formatCurrency(totals.youOwe, symbol)}
               </p>
               <p className="text-sm mt-1 flex items-center gap-1">
                 <ArrowDownRight className="w-4 h-4 text-red-500" />
-                To {balances.filter((b) => b.balance < 0).length} friends
+                {strings.dashboard.summary.oweTo(
+                  balances.filter((b) => b.balance < 0).length,
+                )}
               </p>
             </div>
             <div className="w-12 h-12 bg-white border-2 border-black rounded-lg flex items-center justify-center">
@@ -155,30 +189,43 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1  md:grid-cols-3 gap-4">
         <NeoCard className="p-4" shadow="sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#FFC29F] border-2 border-black rounded-lg flex items-center justify-center">
+            <div
+              className="w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: themeVars.neoOrange }}
+            >
               <Users className="w-5 h-5" />
             </div>
             <div>
               <p className="text-2xl font-bold">{balances.length}</p>
-              <p className="text-xs text-gray-600">Squad</p>
+              <p className="text-xs text-gray-600">
+                {strings.dashboard.quickStats.squad}
+              </p>
             </div>
           </div>
         </NeoCard>
         <NeoCard className="p-4" shadow="sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#B8FF9F] border-2 border-black rounded-lg flex items-center justify-center">
+            <div
+              className="w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: themeVars.neoGreen }}
+            >
               <Receipt className="w-5 h-5" />
             </div>
             <div>
               <p className="text-2xl font-bold">{expenses.length}</p>
-              <p className="text-xs text-gray-600">Splits</p>
+              <p className="text-xs text-gray-600">
+                {strings.dashboard.quickStats.splits}
+              </p>
             </div>
           </div>
         </NeoCard>
 
         <NeoCard className="p-4" shadow="sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#FFA6F6] border-2 border-black rounded-lg flex items-center justify-center">
+            <div
+              className="w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: themeVars.neoPink }}
+            >
               <Wallet className="w-5 h-5" />
             </div>
             <div>
@@ -189,7 +236,9 @@ export default function DashboardPage() {
                   { minimumFractionDigits: 0, maximumFractionDigits: 0 },
                 )}
               </p>
-              <p className="text-xs text-gray-600">Total split</p>
+              <p className="text-xs text-gray-600">
+                {strings.dashboard.quickStats.totalSplit}
+              </p>
             </div>
           </div>
         </NeoCard>
@@ -200,21 +249,25 @@ export default function DashboardPage() {
         {/* Recent Expenses */}
         <NeoCard shadow="md">
           <div className="p-4 border-b-2 border-black flex items-center justify-between">
-            <h2 className="text-lg font-bold">Recent bills</h2>
+            <h2 className="text-lg font-bold">
+              {strings.dashboard.recentBills.title}
+            </h2>
             <Link
               href="/dashboard/friends"
               className="text-sm font-medium hover:underline"
             >
-              See all
+              {strings.dashboard.recentBills.viewAll}
             </Link>
           </div>
           <div className="divide-y-2 divide-black">
             {loading && (
-              <div className="p-4 text-center text-gray-500">Loading the tea...</div>
+              <div className="p-4 text-center text-gray-500">
+                {strings.dashboard.recentBills.loading}
+              </div>
             )}
             {!loading && recentExpenses.length === 0 && (
               <div className="p-4 text-center text-gray-500">
-                No bills yet
+                {strings.dashboard.recentBills.empty}
               </div>
             )}
             {!loading &&
@@ -224,12 +277,17 @@ export default function DashboardPage() {
                   href={`/dashboard/add-expense?edit=${expense._id}`}
                   className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="w-10 h-10 bg-[#FFC29F] border-2 border-black rounded-lg flex items-center justify-center">
+                  <div
+                    className="w-10 h-10 border-2 border-black rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: themeVars.neoOrange }}
+                  >
                     <Receipt className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">
-                      {expense.title || expense.description || "Bill"}
+                      {expense.title ||
+                        expense.description ||
+                        strings.dashboard.recentBills.fallbackTitle}
                     </p>
                     <p className="text-sm text-gray-600">
                       {new Date(expense.createdAt).toLocaleDateString()}
@@ -241,8 +299,10 @@ export default function DashboardPage() {
                     </p>
                     <p className="text-xs text-gray-500">
                       {expense.paidBy._id === user?._id
-                        ? "You covered it"
-                        : `${expense.paidBy.name} paid`}
+                        ? strings.dashboard.recentBills.paidByYou
+                        : strings.dashboard.recentBills.paidByFriend(
+                            expense.paidBy.name,
+                          )}
                     </p>
                   </div>
                 </Link>
@@ -254,8 +314,13 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* People who owe you */}
           <NeoCard shadow="md">
-            <div className="p-4 border-b-2 border-black bg-[#B8FF9F]">
-              <h2 className="text-lg font-bold">Friends who owe you</h2>
+            <div
+              className="p-4 border-b-2 border-black"
+              style={{ backgroundColor: themeVars.neoGreen }}
+            >
+              <h2 className="text-lg font-bold">
+                {strings.dashboard.balances.oweYouTitle}
+              </h2>
             </div>
             <div className="divide-y-2 divide-black">
               {topOwers.length > 0 ? (
@@ -279,7 +344,7 @@ export default function DashboardPage() {
                 ))
               ) : (
                 <div className="p-4 text-center text-gray-500">
-                  Nobody owes you right now
+                  {strings.dashboard.balances.oweYouEmpty}
                 </div>
               )}
             </div>
@@ -287,8 +352,13 @@ export default function DashboardPage() {
 
           {/* People you owe */}
           <NeoCard shadow="md">
-            <div className="p-4 border-b-2 border-black bg-[#FFA6F6]">
-              <h2 className="text-lg font-bold">Friends you owe</h2>
+            <div
+              className="p-4 border-b-2 border-black"
+              style={{ backgroundColor: themeVars.neoPink }}
+            >
+              <h2 className="text-lg font-bold">
+                {strings.dashboard.balances.youOweTitle}
+              </h2>
             </div>
             <div className="divide-y-2 divide-black">
               {topOwed.length > 0 ? (
@@ -312,7 +382,7 @@ export default function DashboardPage() {
                 ))
               ) : (
                 <div className="p-4 text-center text-gray-500">
-                  {"You do not owe anyone right now"}
+                  {strings.dashboard.balances.youOweEmpty}
                 </div>
               )}
             </div>

@@ -9,8 +9,15 @@ const Settlement = require("../models/Settlement");
 
 const router = express.Router();
 
-const signToken = (userId) =>
-  jwt.sign({ userId }, "change-me", { expiresIn: "7d" });
+const signToken = (userId) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not set");
+  }
+
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+};
 
 router.post("/signup", async (req, res, next) => {
   try {

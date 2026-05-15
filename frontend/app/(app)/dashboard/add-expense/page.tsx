@@ -16,6 +16,7 @@ import { useAuth } from "@/lib/auth-context";
 import { formatCurrency, useCurrency } from "@/lib/currency";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/utils";
+import { strings } from "@/locales/en";
 
 type SplitMethod = "equal" | "unequal" | "shares" | "percentage";
 
@@ -39,6 +40,12 @@ function AddExpenseForm() {
   );
   const [paidBy, setPaidBy] = useState<string>("");
   const [splitMethod, setSplitMethod] = useState<SplitMethod>("equal");
+  const splitLabels: Record<SplitMethod, string> = {
+    equal: strings.addExpense.options.equal,
+    unequal: strings.addExpense.options.unequal,
+    shares: strings.addExpense.options.shares,
+    percentage: strings.addExpense.options.percentage,
+  };
   const [splitValues, setSplitValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<{
@@ -93,8 +100,11 @@ function AddExpenseForm() {
         }
       } catch (error) {
         toast({
-          title: "Could not load the bill",
-          description: getErrorMessage(error, "Try again."),
+          title: strings.addExpense.toasts.loadFailTitle,
+          description: getErrorMessage(
+            error,
+            strings.addExpense.toasts.failFallback,
+          ),
           variant: "destructive",
         });
       } finally {
@@ -136,22 +146,22 @@ function AddExpenseForm() {
 
     if (currentStep === 1) {
       if (!title.trim()) {
-        nextErrors.title = "Give it a title";
+        nextErrors.title = strings.addExpense.errors.titleMissing;
       }
       if (!amount || Number(amount) <= 0) {
-        nextErrors.amount = "Amount must be greater than 0";
+        nextErrors.amount = strings.addExpense.errors.amountInvalid;
       }
     }
 
     if (currentStep === 2) {
       if (selectedParticipants.length === 0) {
-        nextErrors.participants = "Pick at least one friend";
+        nextErrors.participants = strings.addExpense.errors.participantsMissing;
       }
     }
 
     if (currentStep === 3) {
       if (!paidBy) {
-        nextErrors.paidBy = "Who paid? Pick one";
+        nextErrors.paidBy = strings.addExpense.errors.paidByMissing;
       }
 
       if (splitMethod !== "equal") {
@@ -160,16 +170,16 @@ function AddExpenseForm() {
         );
         const hasInvalid = values.some((v) => !v || v <= 0);
         if (hasInvalid) {
-          nextErrors.split = "Give everyone a value";
+          nextErrors.split = strings.addExpense.errors.splitMissing;
         } else if (splitMethod === "percentage") {
           const total = values.reduce((sum, v) => sum + v, 0);
           if (Math.round(total) !== 100) {
-            nextErrors.split = "Percentages must total 100";
+            nextErrors.split = strings.addExpense.errors.splitPercentInvalid;
           }
         } else if (splitMethod === "unequal") {
           const total = values.reduce((sum, v) => sum + v, 0);
           if (Math.abs(total - Number(amount)) > 0.01) {
-            nextErrors.split = "Unequal amounts must match the total";
+            nextErrors.split = strings.addExpense.errors.splitUnequalInvalid;
           }
         }
       }
@@ -230,14 +240,19 @@ function AddExpenseForm() {
       }
 
       toast({
-        title: editId ? "Bill updated" : "Bill created",
-        description: "Saved and ready.",
+        title: editId
+          ? strings.addExpense.toasts.saveSuccessEdit
+          : strings.addExpense.toasts.saveSuccessCreate,
+        description: strings.addExpense.toasts.saveSuccessDescription,
       });
       router.push("/dashboard");
     } catch (error) {
       toast({
-        title: "Could not save bill",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.addExpense.toasts.saveFailTitle,
+        description: getErrorMessage(
+          error,
+          strings.addExpense.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -245,19 +260,22 @@ function AddExpenseForm() {
 
   const handleDelete = async () => {
     if (!editId) return;
-    const confirmed = window.confirm("Delete this bill?");
+    const confirmed = window.confirm(strings.addExpense.toasts.deletePrompt);
     if (!confirmed) return;
     try {
       await apiDelete(`/expenses/${editId}`);
       toast({
-        title: "Bill deleted",
-        description: "That bill is gone.",
+        title: strings.addExpense.toasts.deleteSuccessTitle,
+        description: strings.addExpense.toasts.deleteSuccessDescription,
       });
       router.push("/dashboard");
     } catch (error) {
       toast({
-        title: "Could not delete bill",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.addExpense.toasts.deleteFailTitle,
+        description: getErrorMessage(
+          error,
+          strings.addExpense.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -273,16 +291,18 @@ function AddExpenseForm() {
     <div className="p-4 md:p-8 max-w-2xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
         <button
-          title="back"
+          title={strings.addExpense.backTitle}
           onClick={() =>
             step === 1 ? router.push("/dashboard") : handleBack()
           }
-          className="p-2 border-2 border-black rounded-full hover:bg-[#A6FAFF] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all"
+          className="p-2 border-2 border-black rounded-full hover:bg-primary hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-2xl font-bold">
-          {editId ? "Edit bill" : "Add a bill"}
+          {editId
+            ? strings.addExpense.titleEdit
+            : strings.addExpense.titleCreate}
         </h1>
       </div>
 
@@ -291,7 +311,7 @@ function AddExpenseForm() {
           <div
             key={i}
             className={`flex-1 h-3 border-2 border-black rounded-full ${
-              step >= i ? "bg-[#B8FF9F]" : "bg-white"
+              step >= i ? "bg-accent" : "bg-white"
             }`}
           />
         ))}
@@ -301,13 +321,15 @@ function AddExpenseForm() {
         {step === 1 && (
           <NeoCard className="p-6 space-y-6">
             <h2 className="text-xl font-bold border-b-2 border-black pb-2">
-              Step 1: The basics
+              {strings.addExpense.stepOneTitle}
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block font-medium mb-2">What is this?</label>
+                <label className="block font-medium mb-2">
+                  {strings.addExpense.fields.titleLabel}
+                </label>
                 <NeoInput
-                  placeholder="e.g. Dinner, groceries..."
+                  placeholder={strings.addExpense.fields.titlePlaceholder}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
@@ -318,7 +340,9 @@ function AddExpenseForm() {
                 )}
               </div>
               <div>
-                <label className="block font-medium mb-2">Amount</label>
+                <label className="block font-medium mb-2">
+                  {strings.addExpense.fields.amountLabel}
+                </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold">
                     {symbol}
@@ -326,7 +350,7 @@ function AddExpenseForm() {
                   <NeoInput
                     type="number"
                     step="0.01"
-                    placeholder="0.00"
+                    placeholder={strings.addExpense.fields.amountPlaceholder}
                     className="pl-8"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
@@ -341,10 +365,10 @@ function AddExpenseForm() {
               </div>
               <div>
                 <label className="block font-medium mb-2">
-                  Notes (optional)
+                  {strings.addExpense.fields.notesLabel}
                 </label>
                 <NeoTextarea
-                  placeholder="Any extra context..."
+                  placeholder={strings.addExpense.fields.notesPlaceholder}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
@@ -358,7 +382,8 @@ function AddExpenseForm() {
               variant="primary"
               disabled={!title || !amount}
             >
-              Next <ChevronRight className="w-5 h-5" />
+              {strings.addExpense.buttons.next}{" "}
+              <ChevronRight className="w-5 h-5" />
             </NeoButton>
           </NeoCard>
         )}
@@ -366,23 +391,27 @@ function AddExpenseForm() {
         {step === 2 && (
           <NeoCard className="p-6 space-y-6">
             <h2 className="text-xl font-bold border-b-2 border-black pb-2">
-              Step 2: With who?
+              {strings.addExpense.stepTwoTitle}
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block font-medium mb-2">Pick friends</label>
+                <label className="block font-medium mb-2">
+                  {strings.addExpense.fields.participantsLabel}
+                </label>
                 {errors.participants && (
                   <p className="text-sm text-red-600 mb-2">
                     {errors.participants}
                   </p>
                 )}
                 {loading && (
-                  <div className="p-4 text-sm text-gray-500">Loading...</div>
+                  <div className="p-4 text-sm text-gray-500">
+                    {strings.addExpense.messages.loading}
+                  </div>
                 )}
                 {!loading && friends.length === 0 && (
                   <div className="p-4 text-sm text-gray-500">
-                    No squad yet.
+                    {strings.addExpense.messages.noSquad}
                   </div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto p-1">
@@ -392,12 +421,12 @@ function AddExpenseForm() {
                       onClick={() => toggleParticipant(friend._id)}
                       className={`flex items-center gap-3 p-3 border-2 border-black rounded-md cursor-pointer transition-all ${
                         selectedParticipants.includes(friend._id)
-                          ? "bg-[#FFA6F6] shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                          ? "bg-secondary shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                           : "bg-white hover:bg-gray-50"
                       }`}
                     >
                       <div className="flex-1 flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full border-2 border-black bg-[#A6FAFF] flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full border-2 border-black bg-primary flex items-center justify-center">
                           <User className="w-4 h-4" />
                         </div>
                         <span className="font-medium text-sm">
@@ -417,7 +446,7 @@ function AddExpenseForm() {
                 variant="ghost"
                 className="flex-1"
               >
-                Back
+                {strings.addExpense.buttons.back}
               </NeoButton>
               <NeoButton
                 type="button"
@@ -426,7 +455,8 @@ function AddExpenseForm() {
                 variant="primary"
                 disabled={selectedParticipants.length === 0}
               >
-                Next <ChevronRight className="w-5 h-5" />
+                {strings.addExpense.buttons.next}{" "}
+                <ChevronRight className="w-5 h-5" />
               </NeoButton>
             </div>
           </NeoCard>
@@ -435,17 +465,22 @@ function AddExpenseForm() {
         {step === 3 && (
           <NeoCard className="p-6 space-y-6">
             <h2 className="text-xl font-bold border-b-2 border-black pb-2">
-              Step 3: Split style
+              {strings.addExpense.stepThreeTitle}
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block font-medium mb-2">Who paid?</label>
+                <label className="block font-medium mb-2">
+                  {strings.addExpense.fields.paidByLabel}
+                </label>
                 <NeoSelect
                   value={paidBy}
                   onChange={(e) => setPaidBy(e.target.value)}
                   options={[
-                    { value: user?._id || "", label: "You" },
+                    {
+                      value: user?._id || "",
+                      label: strings.addExpense.options.you,
+                    },
                     ...participantsWithUser
                       .filter((p) => p._id !== user?._id)
                       .map((p) => ({ value: p._id, label: p.name })),
@@ -458,7 +493,9 @@ function AddExpenseForm() {
               </div>
 
               <div>
-                <label className="block font-medium mb-2">How do we split?</label>
+                <label className="block font-medium mb-2">
+                  {strings.addExpense.fields.splitLabel}
+                </label>
                 <div className="grid grid-cols-2 gap-3">
                   {(
                     [
@@ -472,7 +509,7 @@ function AddExpenseForm() {
                       key={method}
                       className={`flex flex-col items-center justify-center p-3 border-2 border-black rounded-md cursor-pointer transition-all ${
                         splitMethod === method
-                          ? "bg-[#B8FF9F] shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                          ? "bg-accent shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                           : "bg-white hover:bg-gray-50"
                       }`}
                     >
@@ -484,7 +521,9 @@ function AddExpenseForm() {
                         onChange={() => setSplitMethod(method)}
                         className="hidden"
                       />
-                      <span className="font-medium capitalize">{method}</span>
+                      <span className="font-medium capitalize">
+                        {splitLabels[method]}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -492,7 +531,9 @@ function AddExpenseForm() {
 
               {splitMethod === "equal" && (
                 <div className="p-4 border-2 border-black bg-gray-50 rounded-md">
-                  <p className="text-sm font-medium mb-2">Each person pays:</p>
+                  <p className="text-sm font-medium mb-2">
+                    {strings.addExpense.fields.equalNote}
+                  </p>
                   <p className="text-2xl font-bold">
                     {formatCurrency(
                       parseFloat(amount || "0") / participantsWithUser.length,
@@ -500,7 +541,9 @@ function AddExpenseForm() {
                     )}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {participantsWithUser.length} people splitting equally
+                    {strings.addExpense.fields.equalFootnote(
+                      participantsWithUser.length,
+                    )}
                   </p>
                 </div>
               )}
@@ -508,7 +551,7 @@ function AddExpenseForm() {
               {splitMethod === "unequal" && (
                 <div className="p-4 border-2 border-black bg-gray-50 rounded-md space-y-3">
                   <div className="text-sm font-medium flex items-center justify-between">
-                    <span>Remaining</span>
+                    <span>{strings.addExpense.fields.remainingLabel}</span>
                     <span>
                       {formatCurrency(splitTotals.unequalRemaining, symbol, {
                         absolute: false,
@@ -544,7 +587,7 @@ function AddExpenseForm() {
               {splitMethod === "percentage" && (
                 <div className="p-4 border-2 border-black bg-gray-50 rounded-md space-y-3">
                   <div className="text-sm font-medium flex items-center justify-between">
-                    <span>Remaining</span>
+                    <span>{strings.addExpense.fields.remainingLabel}</span>
                     <span>{splitTotals.percentageRemaining}%</span>
                   </div>
                   {participantsWithUser.map((p) => (
@@ -606,7 +649,7 @@ function AddExpenseForm() {
                   variant="destructive"
                   className="flex-1"
                 >
-                  Delete bill
+                  {strings.addExpense.buttons.delete}
                 </NeoButton>
               )}
               <NeoButton
@@ -615,10 +658,12 @@ function AddExpenseForm() {
                 variant="ghost"
                 className="flex-1"
               >
-                Back
+                {strings.addExpense.buttons.back}
               </NeoButton>
               <NeoButton type="submit" className="flex-1" variant="primary">
-                {editId ? "Update bill" : "Create bill"}
+                {editId
+                  ? strings.addExpense.buttons.update
+                  : strings.addExpense.buttons.create}
               </NeoButton>
             </div>
           </NeoCard>

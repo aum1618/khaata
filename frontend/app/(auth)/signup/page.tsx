@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/utils";
 import { isStrongPassword, isValidEmail } from "@/lib/validation";
+import { strings } from "@/locales/en";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -37,26 +38,25 @@ export default function SignupPage() {
     } = {};
 
     if (!name.trim()) {
-      nextErrors.name = "Name is missing";
+      nextErrors.name = strings.auth.signup.errors.nameMissing;
     }
 
     if (!email.trim()) {
-      nextErrors.email = "Email is missing";
+      nextErrors.email = strings.auth.signup.errors.emailMissing;
     } else if (!isValidEmail(email)) {
-      nextErrors.email = "That email looks off";
+      nextErrors.email = strings.auth.signup.errors.emailInvalid;
     }
 
     if (!password) {
-      nextErrors.password = "Password is missing";
+      nextErrors.password = strings.auth.signup.errors.passwordMissing;
     } else if (!isStrongPassword(password)) {
-      nextErrors.password =
-        "Use 8+ chars with letters and numbers";
+      nextErrors.password = strings.auth.signup.errors.passwordWeak;
     }
 
     if (!confirmPassword) {
-      nextErrors.confirmPassword = "Type it again";
+      nextErrors.confirmPassword = strings.auth.signup.errors.confirmMissing;
     } else if (password !== confirmPassword) {
-      nextErrors.confirmPassword = "Passwords do not match";
+      nextErrors.confirmPassword = strings.auth.signup.errors.confirmMismatch;
     }
 
     if (Object.keys(nextErrors).length > 0) {
@@ -72,15 +72,15 @@ export default function SignupPage() {
       const success = await signup(name, email, password);
       if (success) {
         toast({
-          title: "Account unlocked",
-          description: "Welcome to Khaata. Let's roll.",
+          title: strings.auth.signup.toasts.successTitle,
+          description: strings.auth.signup.toasts.successDescription,
         });
         router.push("/dashboard");
       } else {
-        const message = "Could not make that account. Try again.";
+        const message = strings.auth.signup.toasts.failMessage;
         setError(message);
         toast({
-          title: "Signup flopped",
+          title: strings.auth.signup.toasts.failTitle,
           description: message,
           variant: "destructive",
         });
@@ -88,11 +88,11 @@ export default function SignupPage() {
     } catch (caughtError) {
       const message = getErrorMessage(
         caughtError,
-        "Something glitched. Try again.",
+        strings.auth.signup.toasts.glitchFallback,
       );
       setError(message);
       toast({
-        title: "Signup flopped",
+        title: strings.auth.signup.toasts.failTitle,
         description: message,
         variant: "destructive",
       });
@@ -102,36 +102,40 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFEF0] flex flex-col items-center justify-center p-4 neo-page">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 neo-page">
       {/* Logo */}
       <div className="mb-8 text-center">
         <div className="flex items-center justify-center gap-3 mb-2">
-          <div className="w-12 h-12 bg-[#A6FAFF] border-2 border-black rounded-lg flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)] neo-float">
+          <div className="w-12 h-12 bg-primary border-2 border-black rounded-lg flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)] neo-float">
             <Wallet className="w-7 h-7" />
           </div>
-          <h1 className="text-4xl font-bold">Khaata</h1>
+          <h1 className="text-4xl font-bold">{strings.app.name}</h1>
         </div>
-        <p className="text-gray-600">Split bills with friends, no drama</p>
+        <p className="text-gray-600">{strings.auth.signup.logoTagline}</p>
       </div>
 
       {/* Signup Card */}
       <NeoCard className="w-full max-w-md p-6 neo-pop" shadow="lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Make it official</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          {strings.auth.signup.title}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 bg-[#FF6B6B] border-2 border-black rounded-md text-sm">
+            <div className="p-3 bg-destructive border-2 border-black rounded-md text-sm">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Your name</label>
+            <label className="text-sm font-medium">
+              {strings.auth.signup.nameLabel}
+            </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <NeoInput
                 type="text"
-                placeholder="Alex Carter"
+                placeholder={strings.auth.signup.namePlaceholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="pl-10"
@@ -145,12 +149,14 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium">
+              {strings.auth.signup.emailLabel}
+            </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <NeoInput
                 type="email"
-                placeholder="you@example.com"
+                placeholder={strings.auth.signup.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
@@ -164,19 +170,21 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Password</label>
+            <label className="text-sm font-medium">
+              {strings.auth.signup.passwordLabel}
+            </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <NeoInput
                 type="password"
-                placeholder="Make a password"
+                placeholder={strings.auth.signup.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10"
                 required
                 minLength={8}
                 pattern="(?=.*[A-Za-z])(?=.*\d).{8,}"
-                title="Use at least 8 characters with letters and numbers"
+                title={strings.common.passwordHint}
                 aria-invalid={!!errors.password}
               />
             </div>
@@ -186,12 +194,14 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Confirm password</label>
+            <label className="text-sm font-medium">
+              {strings.auth.signup.confirmPasswordLabel}
+            </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <NeoInput
                 type="password"
-                placeholder="Run it back"
+                placeholder={strings.auth.signup.confirmPasswordPlaceholder}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="pl-10"
@@ -210,15 +220,17 @@ export default function SignupPage() {
             size="lg"
             disabled={loading}
           >
-            {loading ? "Creating..." : "Create it"}
+            {loading
+              ? strings.auth.signup.submitLoading
+              : strings.auth.signup.submit}
           </NeoButton>
         </form>
 
         <div className="mt-6 pt-6 border-t-2 border-black text-center">
           <p className="text-sm text-gray-600">
-            Already vibing?{" "}
+            {strings.auth.signup.switchPrompt}{" "}
             <Link href="/login" className="font-bold hover:underline">
-              Log in
+              {strings.auth.signup.switchCta}
             </Link>
           </p>
         </div>

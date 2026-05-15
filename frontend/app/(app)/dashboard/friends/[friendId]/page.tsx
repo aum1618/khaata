@@ -27,6 +27,7 @@ import { useAuth } from "@/lib/auth-context";
 import { cn, getErrorMessage } from "@/lib/utils";
 import { formatCurrency, useCurrency } from "@/lib/currency";
 import { toast } from "@/hooks/use-toast";
+import { strings } from "@/locales/en";
 
 export default function FriendDetailPage({
   params,
@@ -58,8 +59,11 @@ export default function FriendDetailPage({
         setExpenses(expenseData || []);
       } catch (error) {
         toast({
-          title: "Could not load friend",
-          description: getErrorMessage(error, "Try again."),
+          title: strings.friendDetails.toasts.loadFailTitle,
+          description: getErrorMessage(
+            error,
+            strings.friendDetails.toasts.failFallback,
+          ),
           variant: "destructive",
         });
       } finally {
@@ -85,11 +89,11 @@ export default function FriendDetailPage({
     const amount = Number(settleAmount);
     const maxAmount = Math.abs(balanceAmount);
     if (!amount || amount <= 0) {
-      setSettleError("Enter a valid amount");
+      setSettleError(strings.friendDetails.modal.errors.invalidAmount);
       return;
     }
     if (amount > maxAmount) {
-      setSettleError("Amount exceeds the current balance");
+      setSettleError(strings.friendDetails.modal.errors.exceedsBalance);
       return;
     }
     if (!friend) return;
@@ -104,13 +108,16 @@ export default function FriendDetailPage({
       );
       setFriendEntry(entry || null);
       toast({
-        title: "Settlement logged",
-        description: "Balance updated.",
+        title: strings.friendDetails.toasts.settleSuccessTitle,
+        description: strings.friendDetails.toasts.settleSuccessDescription,
       });
     } catch (error) {
       toast({
-        title: "Could not settle",
-        description: getErrorMessage(error, "Try again."),
+        title: strings.friendDetails.toasts.settleFailTitle,
+        description: getErrorMessage(
+          error,
+          strings.friendDetails.toasts.failFallback,
+        ),
         variant: "destructive",
       });
     }
@@ -120,9 +127,11 @@ export default function FriendDetailPage({
     return (
       <div className="p-4 md:p-6">
         <NeoCard className="p-8 text-center" shadow="md">
-          <p className="text-lg font-medium mb-4">Friend not found</p>
+          <p className="text-lg font-medium mb-4">
+            {strings.friendDetails.notFoundTitle}
+          </p>
           <NeoButton onClick={() => router.push("/dashboard/friends")}>
-            Back to squad
+            {strings.friendDetails.backToSquad}
           </NeoButton>
         </NeoCard>
       </div>
@@ -135,16 +144,20 @@ export default function FriendDetailPage({
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.back()}
+          aria-label={strings.common.back}
+          title={strings.common.back}
           className="p-2 border-2 border-black rounded-md hover:bg-gray-100 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-bold">Friend details</h1>
+        <h1 className="text-xl font-bold">
+          {strings.friendDetails.headerTitle}
+        </h1>
       </div>
 
       {loading && (
         <NeoCard className="p-6 text-center" shadow="md">
-          Loading...
+          {strings.friendDetails.loading}
         </NeoCard>
       )}
 
@@ -156,10 +169,10 @@ export default function FriendDetailPage({
               className={cn(
                 "p-6 border-b-2 border-black",
                 balanceAmount > 0
-                  ? "bg-[#B8FF9F]"
+                  ? "bg-accent"
                   : balanceAmount < 0
-                    ? "bg-[#FFA6F6]"
-                    : "bg-[#A6FAFF]",
+                    ? "bg-secondary"
+                    : "bg-primary",
               )}
             >
               <div className="flex items-start gap-4">
@@ -177,7 +190,9 @@ export default function FriendDetailPage({
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Balance</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {strings.friendDetails.balanceLabel}
+                  </p>
                   <p
                     className={cn(
                       "text-3xl font-bold",
@@ -189,7 +204,7 @@ export default function FriendDetailPage({
                     )}
                   >
                     {balanceAmount === 0 ? (
-                      "All even"
+                      strings.friendDetails.balanceEven
                     ) : (
                       <>
                         {formatCurrency(balanceAmount, symbol, {
@@ -201,10 +216,10 @@ export default function FriendDetailPage({
                   </p>
                   <p className="text-sm text-gray-500">
                     {balanceAmount > 0
-                      ? "owes you"
+                      ? strings.friendDetails.balanceOwesYou
                       : balanceAmount < 0
-                        ? "you owe"
-                        : "all settled"}
+                        ? strings.friendDetails.balanceYouOwe
+                        : strings.friendDetails.balanceSettled}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -215,7 +230,7 @@ export default function FriendDetailPage({
                         onClick={() => setShowSettleModal(true)}
                       >
                         <DollarSign className="w-4 h-4" />
-                        Settle up
+                        {strings.friendDetails.settleUp}
                       </NeoButton>
                     </>
                   )}
@@ -227,8 +242,12 @@ export default function FriendDetailPage({
           {/* Transaction History */}
           <NeoCard shadow="md">
             <div className="p-4 border-b-2 border-black flex items-center justify-between">
-              <h3 className="font-bold text-lg">History</h3>
-              <NeoBadge>{friendExpenses.length} bills</NeoBadge>
+              <h3 className="font-bold text-lg">
+                {strings.friendDetails.historyTitle}
+              </h3>
+              <NeoBadge>
+                {strings.friendDetails.billsCount(friendExpenses.length)}
+              </NeoBadge>
             </div>
             <div className="divide-y-2 divide-black">
               {friendExpenses.length > 0 ? (
@@ -251,7 +270,7 @@ export default function FriendDetailPage({
                       className="p-4 block hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-[#FFC29F] border-2 border-black rounded-lg flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 bg-warning border-2 border-black rounded-lg flex items-center justify-center shrink-0">
                           <Receipt className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -260,7 +279,7 @@ export default function FriendDetailPage({
                               <p className="font-medium">
                                 {expense.title ||
                                   expense.description ||
-                                  "Bill"}
+                                  strings.friendDetails.expenseFallback}
                               </p>
                               <p className="text-sm text-gray-500">
                                 {new Date(
@@ -274,8 +293,10 @@ export default function FriendDetailPage({
                               </p>
                               <p className="text-xs text-gray-500">
                                 {youPaid
-                                  ? "You covered it"
-                                  : `${expense.paidBy.name} paid`}
+                                  ? strings.friendDetails.paidByYou
+                                  : strings.friendDetails.paidByFriend(
+                                      expense.paidBy.name,
+                                    )}
                               </p>
                             </div>
                           </div>
@@ -285,7 +306,8 @@ export default function FriendDetailPage({
                               {friendOwesYou !== undefined && (
                                 <NeoBadge variant="accent">
                                   <ArrowUpRight className="w-3 h-3 mr-1" />
-                                  {friend.name} owes{" "}
+                                  {friend.name}{" "}
+                                  {strings.friendDetails.balanceOwesYou}{" "}
                                   {formatCurrency(
                                     friendSplit?.amountOwed || 0,
                                     symbol,
@@ -295,7 +317,7 @@ export default function FriendDetailPage({
                               {youOweFriend !== undefined && (
                                 <NeoBadge variant="secondary">
                                   <ArrowDownRight className="w-3 h-3 mr-1" />
-                                  You owe{" "}
+                                  {strings.friendDetails.balanceYouOwe}{" "}
                                   {formatCurrency(
                                     userSplit?.amountOwed || 0,
                                     symbol,
@@ -312,7 +334,7 @@ export default function FriendDetailPage({
               ) : (
                 <div className="p-8 text-center text-gray-500">
                   <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p>No bills with {friend.name} yet</p>
+                  <p>{strings.friendDetails.noBills(friend.name)}</p>
                 </div>
               )}
             </div>
@@ -325,14 +347,16 @@ export default function FriendDetailPage({
               setShowSettleModal(false);
               setSettleError("");
             }}
-            title="Settle up"
+            title={strings.friendDetails.modal.title}
           >
             <div className="space-y-4">
               <div className="text-center p-4 bg-gray-100 border-2 border-black rounded-md">
                 <p className="text-sm text-gray-600 mb-1">
                   {balanceAmount > 0
-                    ? `${friend.name} owes you`
-                    : `You owe ${friend.name}`}
+                    ? strings.friendDetails.modal.balanceHintOwes(friend.name)
+                    : strings.friendDetails.modal.balanceHintYouOwe(
+                        friend.name,
+                      )}
                 </p>
                 <p className="text-3xl font-bold">
                   {formatCurrency(balanceAmount, symbol, {
@@ -342,12 +366,14 @@ export default function FriendDetailPage({
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Amount to settle</label>
+                <label className="text-sm font-medium">
+                  {strings.friendDetails.modal.amountLabel}
+                </label>
                 <NeoInput
                   type="number"
                   value={settleAmount}
                   onChange={(e) => setSettleAmount(e.target.value)}
-                  placeholder="0.00"
+                  placeholder={strings.friendDetails.modal.amountPlaceholder}
                   min="0"
                   aria-invalid={!!settleError}
                 />
@@ -362,14 +388,14 @@ export default function FriendDetailPage({
                   className="flex-1"
                   onClick={() => setShowSettleModal(false)}
                 >
-                  Cancel
+                  {strings.friendDetails.modal.cancel}
                 </NeoButton>
                 <NeoButton
                   variant="accent"
                   className="flex-1"
                   onClick={handleSettle}
                 >
-                  Confirm
+                  {strings.friendDetails.modal.confirm}
                 </NeoButton>
               </div>
             </div>

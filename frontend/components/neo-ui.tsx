@@ -21,11 +21,13 @@ export const NeoButton = React.forwardRef<HTMLButtonElement, NeoButtonProps>(
     ref,
   ) => {
     const variants = {
-      primary: "bg-[#A6FAFF] hover:bg-[#79F7FF] active:bg-[#00E1EF]",
-      secondary: "bg-[#FFA6F6] hover:bg-[#fa8cef] active:bg-[#f774ea]",
-      accent: "bg-[#B8FF9F] hover:bg-[#9dfc7c] active:bg-[#7df752]",
-      warning: "bg-[#FFC29F] hover:bg-[#FFB080] active:bg-[#FF965B]",
-      destructive: "bg-[#FF6B6B] hover:bg-[#FF5252] active:bg-[#FF3838]",
+      primary: "bg-primary hover:bg-primary-hover active:bg-primary-active",
+      secondary:
+        "bg-secondary hover:bg-secondary-hover active:bg-secondary-active",
+      accent: "bg-accent hover:bg-accent-hover active:bg-accent-active",
+      warning: "bg-warning hover:bg-warning-hover active:bg-warning-active",
+      destructive:
+        "bg-destructive hover:bg-destructive-hover active:bg-destructive-active",
       ghost: "bg-white hover:bg-gray-100 active:bg-gray-200",
     };
 
@@ -42,7 +44,7 @@ export const NeoButton = React.forwardRef<HTMLButtonElement, NeoButtonProps>(
         className={cn(
           "border-black border-2 font-medium transition-all",
           "hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
-          "active:shadow-none active:translate-x-[2px] active:translate-y-[2px]",
+          "active:shadow-none active:translate-x-0.5 active:translate-y-0.5",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none",
           "rounded-md flex items-center justify-center gap-2",
           variants[variant],
@@ -68,7 +70,7 @@ export const NeoInput = React.forwardRef<HTMLInputElement, NeoInputProps>(
         ref={ref}
         className={cn(
           "w-full border-black border-2 p-2.5 bg-white rounded-md",
-          "focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)] focus:bg-[#FFA6F6]",
+          "focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)] focus:bg-secondary",
           "placeholder:text-gray-400",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           className,
@@ -92,7 +94,7 @@ export const NeoTextarea = React.forwardRef<
       ref={ref}
       className={cn(
         "w-full border-black border-2 p-2.5 bg-white rounded-md resize-none",
-        "focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)] focus:bg-[#FFA6F6]",
+        "focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)] focus:bg-secondary",
         "placeholder:text-gray-400",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         className,
@@ -116,9 +118,9 @@ export const NeoCard = React.forwardRef<HTMLDivElement, NeoCardProps>(
   ) => {
     const variants = {
       default: "bg-white",
-      primary: "bg-[#A6FAFF]",
-      secondary: "bg-[#FFA6F6]",
-      accent: "bg-[#B8FF9F]",
+      primary: "bg-primary",
+      secondary: "bg-secondary",
+      accent: "bg-accent",
     };
 
     const shadows = {
@@ -163,8 +165,8 @@ export const NeoCheckbox = React.forwardRef<HTMLInputElement, NeoCheckboxProps>(
             ref={ref}
             type="checkbox"
             className={cn(
-              "appearance-none w-5 h-5 border-2 border-black rounded-sm bg-[#FFC29F] cursor-pointer",
-              "checked:bg-[#FF965B]",
+              "appearance-none w-5 h-5 border-2 border-black rounded-sm bg-warning cursor-pointer",
+              "checked:bg-warning-active",
               "hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
               "focus:outline-none focus:ring-0",
               className,
@@ -172,8 +174,7 @@ export const NeoCheckbox = React.forwardRef<HTMLInputElement, NeoCheckboxProps>(
             {...props}
           />
           <svg
-            className="absolute top-0.5 left-1 w-3 h-3 pointer-events-none opacity-0 peer-checked:opacity-100"
-            style={{ opacity: "var(--checkbox-opacity, 0)" }}
+            className="neo-checkbox-mark absolute top-0.5 left-1 w-3 h-3 pointer-events-none opacity-0 peer-checked:opacity-100"
             fill="none"
             stroke="black"
             strokeWidth="3"
@@ -204,7 +205,7 @@ export const NeoSelect = React.forwardRef<HTMLSelectElement, NeoSelectProps>(
           "focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           "bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')]",
-          "bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.5rem]",
+          "bg-no-repeat bg-position-[right_0.5rem_center] bg-size-[1.5rem]",
           className,
         )}
         {...props}
@@ -235,11 +236,11 @@ export const NeoBadge = React.forwardRef<HTMLSpanElement, NeoBadgeProps>(
   ({ className, variant = "default", children, ...props }, ref) => {
     const variants = {
       default: "bg-white",
-      primary: "bg-[#A6FAFF]",
-      secondary: "bg-[#FFA6F6]",
-      accent: "bg-[#B8FF9F]",
-      warning: "bg-[#FFC29F]",
-      destructive: "bg-[#FF6B6B]",
+      primary: "bg-primary",
+      secondary: "bg-secondary",
+      accent: "bg-accent",
+      warning: "bg-warning",
+      destructive: "bg-destructive",
     };
 
     return (
@@ -283,9 +284,15 @@ export const NeoAvatar = React.forwardRef<HTMLDivElement, NeoAvatarProps>(
         .slice(0, 2);
     };
 
-    const getColor = (name: string) => {
-      const colors = ["#A6FAFF", "#FFA6F6", "#B8FF9F", "#FFC29F", "#FEF08A"];
-      const index = name.charCodeAt(0) % colors.length;
+    const getColorIndex = (label: string) => {
+      const colors = [
+        "bg-primary",
+        "bg-secondary",
+        "bg-accent",
+        "bg-warning",
+        "bg-neo-yellow",
+      ];
+      const index = label.charCodeAt(0) % colors.length;
       return colors[index];
     };
 
@@ -295,9 +302,9 @@ export const NeoAvatar = React.forwardRef<HTMLDivElement, NeoAvatarProps>(
         className={cn(
           "rounded-full border-2 border-black flex items-center justify-center font-bold overflow-hidden",
           sizes[size],
+          src ? "" : getColorIndex(name),
           className,
         )}
-        style={{ backgroundColor: src ? undefined : getColor(name) }}
         {...props}
       >
         {src ? (
@@ -381,9 +388,7 @@ export const NeoTabs: React.FC<NeoTabsProps> = ({
           onClick={() => onChange(tab.id)}
           className={cn(
             "flex flex-1 justify-center  items-center gap-2 px-4 py-2 font-medium transition-colors border-r-2 border-black last:border-r-0",
-            activeTab === tab.id
-              ? "bg-[#A6FAFF]"
-              : "bg-white hover:bg-gray-100",
+            activeTab === tab.id ? "bg-primary" : "bg-white hover:bg-gray-100",
           )}
         >
           {tab.icon}
@@ -416,9 +421,9 @@ export const NeoToggle = React.forwardRef<HTMLInputElement, NeoToggleProps>(
           <div
             className={cn(
               "w-11 h-6 bg-gray-300 rounded-full border-2 border-black",
-              "peer-checked:bg-[#FFA6F6]",
+              "peer-checked:bg-secondary",
               "peer-checked:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
-              "after:content-[''] after:absolute after:top-[3px] after:left-[3px]",
+              "after:content-[''] after:absolute after:top-0.75 after:left-0.75",
               "after:w-4 after:h-4 after:bg-white after:rounded-full after:border-2 after:border-black",
               "after:transition-all peer-checked:after:translate-x-5",
               className,

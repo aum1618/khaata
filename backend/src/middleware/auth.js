@@ -2,6 +2,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const auth = async (req, res, next) => {
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ message: "JWT_SECRET is not set" });
+  }
+
   const header = req.headers.authorization || "";
   if (!header.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Missing token" });
@@ -9,7 +13,7 @@ const auth = async (req, res, next) => {
 
   const token = header.replace("Bearer ", "").trim();
   try {
-    const payload = jwt.verify(token, "change-me");
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(payload.userId).select(
       "_id name email role isActive",
     );

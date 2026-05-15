@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/utils";
 import { isValidEmail } from "@/lib/validation";
+import { strings } from "@/locales/en";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,13 +27,13 @@ export default function LoginPage() {
     setError("");
     const nextErrors: { email?: string; password?: string } = {};
     if (!email.trim()) {
-      nextErrors.email = "Email is missing";
+      nextErrors.email = strings.auth.login.errors.emailMissing;
     } else if (!isValidEmail(email)) {
-      nextErrors.email = "That email looks off";
+      nextErrors.email = strings.auth.login.errors.emailInvalid;
     }
 
     if (!password) {
-      nextErrors.password = "Password is missing";
+      nextErrors.password = strings.auth.login.errors.passwordMissing;
     }
 
     if (Object.keys(nextErrors).length > 0) {
@@ -47,15 +48,15 @@ export default function LoginPage() {
       const success = await login(email, password);
       if (success) {
         toast({
-          title: "You are in",
-          description: "Welcome back, you legend.",
+          title: strings.auth.login.toasts.successTitle,
+          description: strings.auth.login.toasts.successDescription,
         });
         router.push("/dashboard");
       } else {
-        const message = "Email or password looks wrong";
+        const message = strings.auth.login.toasts.failMessage;
         setError(message);
         toast({
-          title: "Login flopped",
+          title: strings.auth.login.toasts.failTitle,
           description: message,
           variant: "destructive",
         });
@@ -63,11 +64,11 @@ export default function LoginPage() {
     } catch (caughtError) {
       const message = getErrorMessage(
         caughtError,
-        "Something glitched. Try again.",
+        strings.auth.login.toasts.glitchFallback,
       );
       setError(message);
       toast({
-        title: "Login flopped",
+        title: strings.auth.login.toasts.failTitle,
         description: message,
         variant: "destructive",
       });
@@ -77,36 +78,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFEF0] flex flex-col items-center justify-center p-4 neo-page">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 neo-page">
       {/* Logo */}
       <div className="mb-8 text-center">
         <div className="flex items-center justify-center gap-3 mb-2">
-          <div className="w-12 h-12 bg-[#A6FAFF] border-2 border-black rounded-lg flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)] neo-float">
+          <div className="w-12 h-12 bg-primary border-2 border-black rounded-lg flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)] neo-float">
             <Wallet className="w-7 h-7" />
           </div>
-          <h1 className="text-4xl font-bold">Khaata</h1>
+          <h1 className="text-4xl font-bold">{strings.app.name}</h1>
         </div>
-        <p className="text-gray-600">Split bills with friends, no drama</p>
+        <p className="text-gray-600">{strings.auth.login.logoTagline}</p>
       </div>
 
       {/* Login Card */}
       <NeoCard className="w-full max-w-md p-6 neo-pop" shadow="lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Back again?</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          {strings.auth.login.title}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 bg-[#FF6B6B] border-2 border-black rounded-md text-sm">
+            <div className="p-3 bg-destructive border-2 border-black rounded-md text-sm">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium">
+              {strings.auth.login.emailLabel}
+            </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <NeoInput
                 type="email"
-                placeholder="you@example.com"
+                placeholder={strings.auth.login.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
@@ -120,12 +125,14 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Password</label>
+            <label className="text-sm font-medium">
+              {strings.auth.login.passwordLabel}
+            </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <NeoInput
                 type="password"
-                placeholder="Your secret code"
+                placeholder={strings.auth.login.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10"
@@ -144,15 +151,17 @@ export default function LoginPage() {
             size="lg"
             disabled={loading}
           >
-            {loading ? "Letting you in..." : "Log in"}
+            {loading
+              ? strings.auth.login.submitLoading
+              : strings.auth.login.submit}
           </NeoButton>
         </form>
 
         <div className="mt-6 pt-6 border-t-2 border-black text-center">
           <p className="text-sm text-gray-600">
-            {"New here? "}
+            {strings.auth.login.switchPrompt}{" "}
             <Link href="/signup" className="font-bold hover:underline">
-              Join up
+              {strings.auth.login.switchCta}
             </Link>
           </p>
         </div>
